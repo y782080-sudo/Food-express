@@ -19,7 +19,14 @@
     .search-wrapper i { color: #ff7a2f; font-size: 18px; }
     .search-wrapper input { background: transparent; border: none; padding: 14px 0; width: 100%; font-size: 16px; color: #f0f0f0; outline: none; }
     
+    /* HOW TO ORDER GUIDE */
+    .guide-box { background: #1f1f1f; border-left: 4px solid #ff6b1a; padding: 14px 18px; border-radius: 12px; margin: 0 0 16px 0; }
+    .guide-box h4 { color: #ff8c2e; font-size: 15px; margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
+    .guide-box ol { margin: 0; padding-left: 20px; color: #ccc; font-size: 13px; line-height: 1.6; }
+    .guide-box ol li strong { color: #fff; }
+
     .categories { display: flex; gap: 14px; overflow-x: auto; padding-bottom: 12px; margin-bottom: 16px; scrollbar-width: none; }
+    .categories::-webkit-scrollbar { display: none; }
     .cat-item { background: #1f1f1f; padding: 10px 22px; border-radius: 40px; font-weight: 600; font-size: 15px; white-space: nowrap; border: 1px solid #2c2c2c; color: #ccc; cursor: pointer; }
     .cat-item.active, .cat-item:hover { background: #ff6b1a; border-color: #ff6b1a; color: #0b0b0b; }
     
@@ -54,7 +61,7 @@
     .cart-item .qty-control { display: flex; gap: 12px; align-items: center; background: #1a1a1a; padding: 2px 12px; border-radius: 40px; }
     .qty-control i { color: #ff6b1a; cursor: pointer; font-size: 16px; }
     
-    /* UPDATED CART TOTAL STYLES */
+    /* CART TOTAL SPLIT */
     .cart-total { display: flex; flex-direction: column; align-items: stretch; gap: 6px; margin-top: 12px; border-top: 1px solid #333; padding-top: 12px; }
     .cart-total .total-row { display: flex; justify-content: space-between; width: 100%; }
     .cart-total .total-row .label { font-weight: 700; }
@@ -68,14 +75,15 @@
     .order-section input::placeholder, .order-section textarea::placeholder { color: #777; }
     .confirm-btn { background: #ff6b1a; border: none; width: 100%; padding: 16px; border-radius: 60px; font-weight: 700; font-size: 18px; color: #0b0b0b; cursor: pointer; margin: 10px 0 6px; }
     .empty-cart-msg { color: #888; padding: 14px 0; text-align: center; }
-    
-    .terms-box { margin-top: 20px; padding: 16px; background: #1f1f1f; border: 1px solid #333; border-radius: 16px; }
-    .terms-box h4 { color: #ff8c2e; margin-bottom: 8px; font-size: 16px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
-    .terms-box ul { list-style: none; padding-left: 0; margin-top: 10px; display: none; }
-    .terms-box ul.open { display: block; }
-    .terms-box ul li { font-size: 13px; color: #bbb; line-height: 1.8; padding: 4px 0; border-bottom: 1px solid #2a2a2a; }
-    .terms-box ul li:last-child { border-bottom: none; }
-    .terms-box ul li strong { color: #fff; }
+
+    /* TERMS & FAQ COLLAPSIBLE */
+    .accordion-box { margin-top: 20px; padding: 16px; background: #1f1f1f; border: 1px solid #333; border-radius: 16px; }
+    .accordion-box h4 { color: #ff8c2e; margin-bottom: 8px; font-size: 16px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+    .accordion-box ul { list-style: none; padding-left: 0; margin-top: 10px; display: none; }
+    .accordion-box ul.open { display: block; }
+    .accordion-box ul li { font-size: 13px; color: #bbb; line-height: 1.8; padding: 4px 0; border-bottom: 1px solid #2a2a2a; }
+    .accordion-box ul li:last-child { border-bottom: none; }
+    .accordion-box ul li strong { color: #fff; }
 
     /* --- MODAL --- */
     .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(6px); display: flex; justify-content: center; align-items: center; z-index: 9999; opacity: 1; transition: opacity 0.3s; }
@@ -116,13 +124,23 @@
 <div id="app">
   <div class="app-header">
     <div class="logo-icon"><i class="fas fa-bolt"></i></div>
-    <div><span class="logo-text">Food express</span><span class="logo-sub"  
-    >Delivery</span></div>
+    <div><span class="logo-text">Food Express</span><span class="logo-sub">delivery</span></div>
   </div>
 
   <div class="search-wrapper">
     <i class="fas fa-search"></i>
     <input type="text" placeholder="Search food, grocery, veg or medicine..." id="searchInput" />
+  </div>
+
+  <!-- HOW TO ORDER GUIDE -->
+  <div class="guide-box">
+    <h4><i class="fas fa-circle-info"></i> কীভাবে অর্ডার করবেন?</h4>
+    <ol>
+      <li>আপনার পছন্দের রেস্টুরেন্ট বা ক্যাটাগরি থেকে আইটেম বেছে <strong>"+ Add"</strong> করুন।</li>
+      <li>কার্টে আইটেম যুক্ত হলে, ডেলিভারির <strong>নাম, ফোন ও ঠিকানা</strong> দিন।</li>
+      <li><strong>"Confirm Order"</strong> বাটনে ক্লিক করুন। হোয়াটসঅ্যাপ ওপেন হবে।</li>
+      <li>হোয়াটসঅ্যাপে <strong>"Send"</strong> বাটনে ক্লিক করলেই আপনার অর্ডার কনফার্ম হবে।</li>
+    </ol>
   </div>
 
   <!-- 5 Categories -->
@@ -152,7 +170,7 @@
     <div class="cart-title"><i class="fas fa-cart-shopping"></i> Your Cart</div>
     <div id="cartItemsContainer"></div>
     
-    <!-- UPDATED CART TOTAL SPLIT -->
+    <!-- CART TOTAL SPLIT -->
     <div class="cart-total">
         <div class="total-row">
             <span class="label">খাবারের মোট (স্থির মূল্য)</span>
@@ -171,23 +189,36 @@
     <input type="tel" id="customerPhone" placeholder="Phone number (Required)" required />
     <input type="text" id="customerAddress" placeholder="Address (Required)" required />
     
-    <!-- UPDATED CUSTOM NOTE PLACEHOLDER -->
+    <!-- CUSTOM NOTE -->
     <textarea id="customerNote" placeholder="📝 আপনার প্রয়োজনীয় মালামাল, পরিমাণ বা বিশেষ নির্দেশনা লিখুন (যেমন: ২ কেজি বাসমতি চাল, ৫ পিস দই, মুরগি অর্ধেক)"></textarea>
     
+    <!-- WHATSAPP BUTTON (WITHOUT SHOWING NUMBER) -->
     <button class="confirm-btn" id="confirmOrderBtn"><i class="fab fa-whatsapp"></i> Confirm Order</button>
-    <div style="font-size: 13px; color: #666; margin-top: 8px;">Order via WhatsApp: 01867477158</div>
+    <div style="font-size: 13px; color: #666; margin-top: 8px;">WhatsApp দিয়ে অর্ডার কনফার্ম করুন</div>
 
-    <!-- Full Terms & Conditions Box (Collapsible) -->
-    <div class="terms-box">
-      <h4>নোট ও শর্তাবলী (Terms & Conditions) <i class="fas fa-chevron-down" id="termsToggleIcon"></i></h4>
+    <!-- TERMS & CONDITIONS -->
+    <div class="accordion-box">
+      <h4>নোট ও শর্তাবলী (Terms) <i class="fas fa-chevron-down" id="termsToggleIcon"></i></h4>
       <ul id="termsContent">
         <li><strong>১. পণ্যের প্রাপ্যতা:</strong> অর্ডারের সময় যদি কোনো আইটেম স্টকে না থাকে, তবে তা ডেলিভারি দেওয়া সম্ভব হবে না।</li>
         <li><strong>২. মূল্য পরিবর্তনশীল:</strong> সব ধরনের পণ্যের (খাবার, গ্রোসারি, সবজি, ওষুধ) দাম বাজারদর ও মৌসুম অনুযায়ী পরিবর্তনশীল। অর্ডার নিশ্চিত করার আগে আমাদের কল করুন।</li>
         <li><strong>৩. ডেলিভারি এলাকা ও চার্জ:</strong> আমাদের ডেলিভারি অঞ্চল <u>শ্রীমঙ্গল ও মৌলভীবাজার জেলায়</u> সীমাবদ্ধ। ডেলিভারির সময় ও অতিরিক্ত ডেলিভারি চার্জ সম্পর্কে ফোনে নিশ্চিত হয়ে নিন।</li>
         <li><strong>৪. পেমেন্ট পদ্ধতি:</strong> ক্যাশ অন ডেলিভারি (COD) উপলব্ধ। এছাড়া বিকাশ/নগদে অগ্রিম পেমেন্ট করা যাবে, অথবা ডেলিভারির সময় রাইডারের বিকাশ কিউআর (QR) কোড স্ক্যান করে পেমেন্ট করা যাবে।</li>
-        <li><strong>৫. অর্ডার বাতিল:</strong> ডেলিভারি পারসন রওনা হওয়ার আগ পর্যন্ত অর্ডার বাতিল করা যাবে।</li>
+        <li><strong>৫. অর্ডার বাতিল:</strong> ডেলিভারি পারসন রওনা হওয়ার আগ পর্যন্ত অর্ডার বাতিল করা যাবে। অ্যাপ থেকে বাতিল করার অপশন নেই, অনুগ্রহ করে সরাসরি ফোন/WhatsApp-এ যোগাযোগ করুন।</li>
         <li><strong>৬. ফেরত/প্রতিস্থাপন:</strong> পচনশীল পণ্য (সবজি, মাছ, মাংস) ফেরত নেওয়া যাবে না। ত্রুটিপূর্ণ পণ্য ডেলিভারি পারসনের কাছে সাথে সাথে প্রতিস্থাপন করিয়ে নিন।</li>
         <li><strong>৭. গোপনীয়তা:</strong> আপনার ফোন ও ঠিকানা শুধুমাত্র অর্ডার প্রক্রিয়াকরণের জন্য ব্যবহার করা হয়।</li>
+      </ul>
+    </div>
+
+    <!-- FAQ SECTION -->
+    <div class="accordion-box" style="margin-top: 10px;">
+      <h4>❓ সাধারণ প্রশ্নাবলী (FAQ) <i class="fas fa-chevron-down" id="faqToggleIcon"></i></h4>
+      <ul id="faqContent">
+        <li><strong>ডেলিভারি কতক্ষণে পাই?</strong> → শ্রীমঙ্গল ও মৌলভীবাজার এলাকায় সাধারণত ৩০-৬০ মিনিটের মধ্যে ডেলিভারি করা হয়।</li>
+        <li><strong>পেমেন্ট কীভাবে করবেন?</strong> → ক্যাশ অন ডেলিভারি (COD) অথবা রাইডারের বিকাশ QR কোড স্ক্যান করে।</li>
+        <li><strong>কোন জিনিস ফেরত দেওয়া যায়?</strong> → পচনশীল পণ্য ফেরত দেওয়া যায় না। ত্রুটিপূর্ণ পণ্য পেলে সাথে সাথে রাইডারকে জানিয়ে প্রতিস্থাপন করে নিন।</li>
+        <li><strong>গ্রোসারি/সবজির দাম কীভাবে ঠিক হবে?</strong> → দাম বাজারদর অনুযায়ী পরিবর্তনশীল। অর্ডার করার আগে ফোন করে দাম নিশ্চিত করে নিন।</li>
+        <li><strong>অর্ডার বাতিল করতে পারব?</strong> → রাইডার রওনা হওয়ার আগ পর্যন্ত বাতিল করা যাবে। বাতিল করতে সরাসরি আমাদের ফোন/WhatsApp-এ কল করুন।</li>
       </ul>
     </div>
   </div>
@@ -239,31 +270,31 @@
     });
     checkUserState();
 
-
-    // ------------------ TOGGLE TERMS ACCORDION ------------------
-    const termsHeader = document.querySelector('.terms-box h4');
-    const termsContent = document.getElementById('termsContent');
-    const termsIcon = document.getElementById('termsToggleIcon');
-
-    termsHeader.addEventListener('click', function() {
-      if (termsContent.classList.contains('open')) {
-        termsContent.classList.remove('open');
-        termsIcon.className = 'fas fa-chevron-down';
-      } else {
-        termsContent.classList.add('open');
-        termsIcon.className = 'fas fa-chevron-up';
-      }
-    });
-
+    // ------------------ TOGGLE TERMS & FAQ ACCORDION ------------------
+    function setupAccordion(headerId, contentId, iconId) {
+      const header = document.getElementById(headerId);
+      const content = document.getElementById(contentId);
+      const icon = document.getElementById(iconId);
+      header.addEventListener('click', function() {
+        if (content.classList.contains('open')) {
+          content.classList.remove('open');
+          icon.className = 'fas fa-chevron-down';
+        } else {
+          content.classList.add('open');
+          icon.className = 'fas fa-chevron-up';
+        }
+      });
+    }
+    setupAccordion('termsToggleIcon', 'termsContent', 'termsToggleIcon');
+    setupAccordion('faqToggleIcon', 'faqContent', 'faqToggleIcon');
 
     // ------------------ SMART ITEM DISPLAY (Weight/Piece) ------------------
     function formatItemDisplay(name, qty) {
-      // Matches patterns like "১ কেজি", "৫০০ গ্রাম", "১ পিস", "২৫০ গ্রাম"
       let match = name.match(/-\s*(\d+(?:\.\d+)?)\s*(কেজি|গ্রাম|পিস|প্যাক|ml|মিলি)/i);
       if (match) {
-        let baseVal = parseFloat(match[1]); // Base numerical value (1, 500, 250)
-        let unit = match[2]; // Unit (কেজি, গ্রাম, পিস)
-        let prefix = name.substring(0, match.index).trim(); // Name part before the "-"
+        let baseVal = parseFloat(match[1]);
+        let unit = match[2];
+        let prefix = name.substring(0, match.index).trim();
 
         if (unit === 'কেজি') {
           let total = baseVal * qty;
@@ -272,7 +303,6 @@
           let totalG = baseVal * qty;
           if (totalG >= 1000) {
             let totalKg = totalG / 1000;
-            // Display 1 instead of 1.0, and 1.5 as 1.5
             let display = Number.isInteger(totalKg) ? totalKg : totalKg.toFixed(1);
             return `${prefix} - ${display} কেজি`;
           } else {
@@ -282,15 +312,13 @@
           return `${prefix} - ${qty} ${unit}`;
         }
       }
-      // Fallback: just multiply x qty
       return `${name} x${qty}`;
     }
 
-
-    // ------------------ DATA ------------------
+    // ------------------ DATA (ALL RESTAURANTS FULL MENU) ------------------
     const restaurantData = [
-      // --- 1. FOOD CATEGORY (Existing 15 restaurants) ---
-      { id: 0, name: "Mommy's Kitchen", cat: "food", items: [ /* ... Keeping original 15 restaurants to save space ... */ 
+      // --- 1. FOOD CATEGORY (15 Restaurants - Full Menus) ---
+      { id: 0, name: "Mommy's Kitchen", cat: "food", items: [
         {name:"Crispy Chicken Burger", price:110, image:"🍔"}, {name:"Crispy Chicken Cheese Burger", price:150, image:"🍔"}, {name:"BBQ Chicken Burger", price:170, image:"🍔"}, {name:"Double Decker Burger", price:200, image:"🍔"}, {name:"American Burger", price:250, image:"🍔"}, {name:"Mommy's Kitchen Special Burger", price:250, image:"🍔"},
         {name:"Chicken Sub", price:130, image:"🥪"}, {name:"Chicken Naga Sub", price:150, image:"🥪"}, {name:"BBQ Chicken Sub", price:170, image:"🥪"}, {name:"AMERICAN sub", price:250, image:"🥪"}, {name:"Club Sandwich", price:250, image:"🥪"},
         {name:"Egg Chowmein", price:100, image:"🍜"}, {name:"Chicken Chowmein", price:140, image:"🍜"}, {name:"BBQ Chowmein", price:170, image:"🍜"}, {name:"MK Special Chowmein", price:200, image:"🍜"},
@@ -684,7 +712,6 @@
       let html = '';
       keys.forEach(key => {
         const item = cart[key];
-        // Calculate food total only for items with price > 0
         if (item.price > 0) {
             foodTotal += item.price * item.qty;
         }
@@ -753,7 +780,7 @@
         notePart = `\n📝 Custom Note:\n${customerNote}\n`;
       }
 
-      return `New Food Express
+      return `New Food Express Order
 📋 Registered Info:
 Name: ${registeredName}
 Phone: ${registeredPhone}
