@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes" />
-  <title>Order Express · food delivery</title>
+  <title>Order Express · food & grocery</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.0.0/css/all.min.css" />
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Roboto, system-ui, sans-serif; }
@@ -43,7 +43,7 @@
     .menu-item .img-placeholder { width: 60px; height: 60px; border-radius: 18px; background: #2e2e2e; display: flex; align-items: center; justify-content: center; font-size: 26px; }
     .menu-item-info { flex: 1; }
     .menu-item-info h4 { font-size: 16px; font-weight: 600; }
-    .menu-item-info p { font-size: 15px; color: #ffb07a; font-weight: 600; }
+    .menu-item-info .item-price { font-size: 15px; color: #ffb07a; font-weight: 600; }
     .menu-item button { background: #ff6b1a; border: none; padding: 10px 16px; border-radius: 40px; font-weight: 700; color: #0b0b0b; font-size: 14px; cursor: pointer; }
     
     .cart-section { background: #1a1a1a; border-radius: 30px; padding: 16px 14px 20px; margin: 18px 0 12px; border: 1px solid #2e2e2e; }
@@ -57,12 +57,56 @@
     
     .order-section { background: #1a1a1a; border-radius: 30px; padding: 18px 16px; border: 1px solid #2e2e2e; margin-top: 12px; }
     .order-section h3 { margin-bottom: 14px; color: #ff8c2e; }
-    .order-section input { width: 100%; padding: 14px 18px; border-radius: 60px; border: none; background: #292929; color: #fff; margin-bottom: 12px; font-size: 15px; }
+    .order-section input, .order-section textarea { width: 100%; padding: 14px 18px; border-radius: 20px; border: none; background: #292929; color: #fff; margin-bottom: 12px; font-size: 15px; resize: vertical; }
+    .order-section textarea { min-height: 80px; }
+    .order-section input::placeholder, .order-section textarea::placeholder { color: #777; }
     .confirm-btn { background: #ff6b1a; border: none; width: 100%; padding: 16px; border-radius: 60px; font-weight: 700; font-size: 18px; color: #0b0b0b; cursor: pointer; margin: 10px 0 6px; }
     .empty-cart-msg { color: #888; padding: 14px 0; text-align: center; }
+    
+    .terms-box { margin-top: 20px; padding: 16px; background: #1f1f1f; border: 1px solid #333; border-radius: 16px; }
+    .terms-box h4 { color: #ff8c2e; margin-bottom: 8px; font-size: 16px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+    .terms-box ul { list-style: none; padding-left: 0; margin-top: 10px; display: none; }
+    .terms-box ul.open { display: block; }
+    .terms-box ul li { font-size: 13px; color: #bbb; line-height: 1.8; padding: 4px 0; border-bottom: 1px solid #2a2a2a; }
+    .terms-box ul li:last-child { border-bottom: none; }
+    .terms-box ul li strong { color: #fff; }
+
+    /* --- MODAL --- */
+    .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(6px); display: flex; justify-content: center; align-items: center; z-index: 9999; opacity: 1; transition: opacity 0.3s; }
+    .modal-overlay.hidden { display: none; opacity: 0; }
+    .modal-box { background: #1a1a1a; border: 1px solid #333; padding: 30px 24px; border-radius: 30px; width: 90%; max-width: 400px; box-shadow: 0 25px 50px rgba(0,0,0,0.9); text-align: center; }
+    .modal-box h2 { color: #ff8c2e; margin-bottom: 6px; font-size: 24px; }
+    .modal-box p { color: #999; font-size: 14px; margin-bottom: 20px; }
+    .modal-input { width: 100%; padding: 14px 18px; border-radius: 60px; border: none; background: #292929; color: #fff; margin-bottom: 14px; font-size: 15px; }
+    .modal-input:focus { outline: 2px solid #ff6b1a; }
+    .modal-btn { background: #ff6b1a; border: none; width: 100%; padding: 14px; border-radius: 60px; font-weight: 700; font-size: 16px; color: #0b0b0b; cursor: pointer; margin-top: 6px; }
+    .modal-btn:active { transform: scale(0.96); }
+    .modal-checkbox { display: flex; align-items: center; justify-content: flex-start; gap: 10px; margin: 10px 0; color: #ccc; font-size: 14px; text-align: left; }
+    .modal-checkbox input { width: 18px; height: 18px; accent-color: #ff6b1a; cursor: pointer; }
+    .modal-error { color: #ff4d4d; font-size: 13px; margin-top: 10px; display: none; }
   </style>
 </head>
 <body>
+
+<!-- REGISTRATION MODAL -->
+<div id="registrationModal" class="modal-overlay hidden">
+  <div class="modal-box">
+    <div class="logo-icon" style="margin: 0 auto 12px;"><i class="fas fa-bolt"></i></div>
+    <h2>Welcome to Order Express!</h2>
+    <p>একবার রেজিস্ট্রেশন করলেই পরের বার সরাসরি অর্ডার করতে পারবেন</p>
+    <input type="text" id="regName" class="modal-input" placeholder="আপনার নাম" required />
+    <input type="tel" id="regPhone" class="modal-input" placeholder="মোবাইল নম্বর (01xxxxxxxxx)" required />
+    
+    <div class="modal-checkbox">
+      <input type="checkbox" id="agreeTerms" />
+      <label for="agreeTerms">আমি নিচের <strong>শর্তাবলী (Terms & Conditions)</strong> মেনে নিচ্ছি।</label>
+    </div>
+    
+    <button class="modal-btn" id="registerBtn">রেজিস্ট্রেশন করুন</button>
+    <div id="regError" class="modal-error">দয়া করে শর্তাবলী মেনে নিয়ে রেজিস্ট্রেশন করুন!</div>
+  </div>
+</div>
+
 <div id="app">
   <div class="app-header">
     <div class="logo-icon"><i class="fas fa-bolt"></i></div>
@@ -71,17 +115,17 @@
 
   <div class="search-wrapper">
     <i class="fas fa-search"></i>
-    <input type="text" placeholder="Search restaurants..." id="searchInput" />
+    <input type="text" placeholder="Search food, grocery, veg or medicine..." id="searchInput" />
   </div>
 
+  <!-- 5 Categories -->
   <div class="categories" id="categoryList">
     <span class="cat-item active" data-cat="all">All</span>
-    <span class="cat-item" data-cat="burger">Burger</span>
-    <span class="cat-item" data-cat="pizza">Pizza</span>
-    <span class="cat-item" data-cat="kacchi">Kacchi</span>
-    <span class="cat-item" data-cat="cafe">Cafe</span>
-    <span class="cat-item" data-cat="drinks">Drinks</span>
-    <span class="cat-item" data-cat="dessert">Dessert</span>
+    <span class="cat-item" data-cat="food">🍔 Food</span>
+    <span class="cat-item" data-cat="grocery">🛒 Grocery</span>
+    <span class="cat-item" data-cat="vegetables">🥦 Vegetables</span>
+    <span class="cat-item" data-cat="medicine">💊 Medicine</span>
+    <span class="cat-item" data-cat="biscuits">🍪 Biscuits</span>
   </div>
 
   <div id="restaurantContainer" class="restaurant-grid"></div>
@@ -90,7 +134,7 @@
     <div class="menu-header">
       <div>
         <h2 id="menuRestoName">Menu</h2>
-        <div style="font-size: 14px; color: #ffb07a; margin-top: 2px;" id="menuRestoSub">Restaurant: </div>
+        <div style="font-size: 14px; color: #ffb07a; margin-top: 2px;" id="menuRestoSub">Shop: </div>
       </div>
       <i class="fas fa-times" id="closeMenuBtn"></i>
     </div>
@@ -104,20 +148,128 @@
   </div>
 
   <div class="order-section">
-    <h3><i class="fas fa-truck"></i> Delivery details</h3>
-    <input type="text" id="customerName" placeholder="Full name" />
-    <input type="text" id="customerPhone" placeholder="Phone number" />
-    <input type="text" id="customerAddress" placeholder="Address" />
+    <h3><i class="fas fa-truck"></i> Delivery details & Note</h3>
+    <input type="text" id="customerName" placeholder="Full name (Required)" required />
+    <input type="tel" id="customerPhone" placeholder="Phone number (Required)" required />
+    <input type="text" id="customerAddress" placeholder="Address (Required)" required />
+    <textarea id="customerNote" placeholder="📝 Note / Special Instructions (যেমন: দই ২ পিস, মুরগি অর্ধেক, দুধের ধরন)"></textarea>
     <button class="confirm-btn" id="confirmOrderBtn"><i class="fab fa-whatsapp"></i> Confirm Order</button>
     <div style="font-size: 13px; color: #666; margin-top: 8px;">Order via WhatsApp: 01867477158</div>
+
+    <!-- Full Terms & Conditions Box (Collapsible) -->
+    <div class="terms-box">
+      <h4>নোট ও শর্তাবলী (Terms & Conditions) <i class="fas fa-chevron-down" id="termsToggleIcon"></i></h4>
+      <ul id="termsContent">
+        <li><strong>১. পণ্যের প্রাপ্যতা:</strong> অর্ডারের সময় যদি কোনো আইটেম স্টকে না থাকে, তবে তা ডেলিভারি দেওয়া সম্ভব হবে না।</li>
+        <li><strong>২. মূল্য পরিবর্তনশীল:</strong> সব ধরনের পণ্যের (খাবার, গ্রোসারি, সবজি, ওষুধ) দাম বাজারদর ও মৌসুম অনুযায়ী পরিবর্তনশীল। অর্ডার নিশ্চিত করার আগে আমাদের কল করুন।</li>
+        <li><strong>৩. ডেলিভারি এলাকা ও চার্জ:</strong> আমাদের ডেলিভারি অঞ্চল <u>শ্রীমঙ্গল ও মৌলভীবাজার জেলায়</u> সীমাবদ্ধ। ডেলিভারির সময় ও অতিরিক্ত ডেলিভারি চার্জ সম্পর্কে ফোনে নিশ্চিত হয়ে নিন।</li>
+        <li><strong>৪. পেমেন্ট পদ্ধতি:</strong> ক্যাশ অন ডেলিভারি (COD) উপলব্ধ। এছাড়া বিকাশ/নগদে অগ্রিম পেমেন্ট করা যাবে, অথবা ডেলিভারির সময় রাইডারের বিকাশ কিউআর (QR) কোড স্ক্যান করে পেমেন্ট করা যাবে।</li>
+        <li><strong>৫. অর্ডার বাতিল:</strong> ডেলিভারি পারসন রওনা হওয়ার আগ পর্যন্ত অর্ডার বাতিল করা যাবে।</li>
+        <li><strong>৬. ফেরত/প্রতিস্থাপন:</strong> পচনশীল পণ্য (সবজি, মাছ, মাংস) ফেরত নেওয়া যাবে না। ত্রুটিপূর্ণ পণ্য ডেলিভারি পারসনের কাছে সাথে সাথে প্রতিস্থাপন করিয়ে নিন।</li>
+        <li><strong>৭. গোপনীয়তা:</strong> আপনার ফোন ও ঠিকানা শুধুমাত্র অর্ডার প্রক্রিয়াকরণের জন্য ব্যবহার করা হয়।</li>
+      </ul>
+    </div>
   </div>
 </div>
 
 <script>
   (function() {
-    // ---------- DATA (15 Restaurants with real menus) ----------
+    // ------------------ REGISTRATION ------------------
+    const regModal = document.getElementById('registrationModal');
+    const regName = document.getElementById('regName');
+    const regPhone = document.getElementById('regPhone');
+    const regBtn = document.getElementById('registerBtn');
+    const regError = document.getElementById('regError');
+    const agreeTerms = document.getElementById('agreeTerms');
+
+    function generateDeviceId() {
+      return 'DEV-' + Math.random().toString(36).substring(2, 10).toUpperCase() + '-' + Date.now().toString(36).toUpperCase();
+    }
+
+    function checkUserState() {
+      const registered = localStorage.getItem('orderExpress_registered');
+      if (!registered) regModal.classList.remove('hidden');
+      else regModal.classList.add('hidden');
+    }
+
+    regBtn.addEventListener('click', function() {
+      const name = regName.value.trim();
+      const phone = regPhone.value.trim();
+
+      if (name === '' || phone.length < 11) {
+        regError.textContent = "সঠিক নাম ও মোবাইল নম্বর দিন!";
+        regError.style.display = 'block';
+        return;
+      }
+      
+      if (!agreeTerms.checked) {
+        regError.textContent = "শর্তাবলী (Terms & Conditions) মেনে নিতে হবে!";
+        regError.style.display = 'block';
+        return;
+      }
+
+      regError.style.display = 'none';
+      localStorage.setItem('orderExpress_registered', 'true');
+      localStorage.setItem('orderExpress_name', name);
+      localStorage.setItem('orderExpress_phone', phone);
+      localStorage.setItem('orderExpress_deviceId', generateDeviceId());
+      alert('✅ রেজিস্ট্রেশন সফল!');
+      regModal.classList.add('hidden');
+    });
+    checkUserState();
+
+
+    // ------------------ TOGGLE TERMS ACCORDION ------------------
+    const termsHeader = document.querySelector('.terms-box h4');
+    const termsContent = document.getElementById('termsContent');
+    const termsIcon = document.getElementById('termsToggleIcon');
+
+    termsHeader.addEventListener('click', function() {
+      if (termsContent.classList.contains('open')) {
+        termsContent.classList.remove('open');
+        termsIcon.className = 'fas fa-chevron-down';
+      } else {
+        termsContent.classList.add('open');
+        termsIcon.className = 'fas fa-chevron-up';
+      }
+    });
+
+
+    // ------------------ SMART ITEM DISPLAY (Weight/Piece) ------------------
+    function formatItemDisplay(name, qty) {
+      // Matches patterns like "১ কেজি", "৫০০ গ্রাম", "১ পিস", "২৫০ গ্রাম"
+      let match = name.match(/-\s*(\d+(?:\.\d+)?)\s*(কেজি|গ্রাম|পিস|প্যাক|ml|মিলি)/i);
+      if (match) {
+        let baseVal = parseFloat(match[1]); // Base numerical value (1, 500, 250)
+        let unit = match[2]; // Unit (কেজি, গ্রাম, পিস)
+        let prefix = name.substring(0, match.index).trim(); // Name part before the "-"
+
+        if (unit === 'কেজি') {
+          let total = baseVal * qty;
+          return `${prefix} - ${total} কেজি`;
+        } else if (unit === 'গ্রাম') {
+          let totalG = baseVal * qty;
+          if (totalG >= 1000) {
+            let totalKg = totalG / 1000;
+            // Display 1 instead of 1.0, and 1.5 as 1.5
+            let display = Number.isInteger(totalKg) ? totalKg : totalKg.toFixed(1);
+            return `${prefix} - ${display} কেজি`;
+          } else {
+            return `${prefix} - ${totalG} গ্রাম`;
+          }
+        } else if (unit === 'পিস' || unit === 'প্যাক') {
+          return `${prefix} - ${qty} ${unit}`;
+        }
+      }
+      // Fallback: just multiply x qty
+      return `${name} x${qty}`;
+    }
+
+
+    // ------------------ DATA ------------------
     const restaurantData = [
-      { id: 0, name: "Mommy's Kitchen", cat: "burger", items: [
+      // --- 1. FOOD CATEGORY (Existing 15 restaurants) ---
+      { id: 0, name: "Mommy's Kitchen", cat: "food", items: [ 
         {name:"Crispy Chicken Burger", price:110, image:"🍔"}, {name:"Crispy Chicken Cheese Burger", price:150, image:"🍔"}, {name:"BBQ Chicken Burger", price:170, image:"🍔"}, {name:"Double Decker Burger", price:200, image:"🍔"}, {name:"American Burger", price:250, image:"🍔"}, {name:"Mommy's Kitchen Special Burger", price:250, image:"🍔"},
         {name:"Chicken Sub", price:130, image:"🥪"}, {name:"Chicken Naga Sub", price:150, image:"🥪"}, {name:"BBQ Chicken Sub", price:170, image:"🥪"}, {name:"AMERICAN sub", price:250, image:"🥪"}, {name:"Club Sandwich", price:250, image:"🥪"},
         {name:"Egg Chowmein", price:100, image:"🍜"}, {name:"Chicken Chowmein", price:140, image:"🍜"}, {name:"BBQ Chowmein", price:170, image:"🍜"}, {name:"MK Special Chowmein", price:200, image:"🍜"},
@@ -138,8 +290,7 @@
         {name:"Potato Wedges", price:70, image:"🍟"}, {name:"French Fries", price:100, image:"🍟"}, {name:"Masala Wedges", price:130, image:"🍟"}, {name:"Chicken Popcorn", price:160, image:"🍗"}, {name:"Chicken Samosa (10pcs)", price:150, image:"🥟"}, {name:"Crispy Fried Chicken (2pcs)", price:160, image:"🍗"}, {name:"Cheesy Chicken Fingers (5pcs)", price:220, image:"🍗"}, {name:"Thai Fried Chicken (5pcs)", price:220, image:"🍗"}, {name:"BBQ Fried Chicken (2pcs)", price:220, image:"🍗"}, {name:"Crispy Wings (6pcs)", price:230, image:"🍗"}, {name:"BBQ Wings (6pcs)", price:240, image:"🍗"}, {name:"Nachos", price:250, image:"🌮"}, {name:"Tender Bites (6pcs)", price:250, image:"🍗"}, {name:"Sipsak Pizza (2pcs)", price:250, image:"🍕"}, {name:"Spicy Egg Balls (5pcs)", price:220, image:"🥚"}, {name:"Crispy Fried Prawn (5pcs)", price:250, image:"🍤"}, {name:"Cheese Prawn Roll (5pcs)", price:280, image:"🍤"}, {name:"Cheesy Spicy Meatball", price:280, image:"🥩"}, {name:"French Toast", price:250, image:"🍞"}, {name:"Pocket Pizza (4pcs)", price:350, image:"🍕"},
         {name:"Meyonise", price:20, image:"🧂"}, {name:"Ketchup", price:20, image:"🧂"}, {name:"Cheese Slice", price:35, image:"🧀"}, {name:"Mozzarella cheese", price:250, image:"🧀"}, {name:"Mushroom", price:100, image:"🍄"}, {name:"Sausage", price:60, image:"🌭"}, {name:"Chicken", price:150, image:"🍗"}
       ]},
-      
-      { id: 1, name: "Kabab Mahol", cat: "kacchi", items: [
+      { id: 1, name: "Kabab Mahol", cat: "food", items: [
         {name:"Chocolate Cup Cake", price:40, image:"🧁"}, {name:"Butterscotch Cup Cake", price:40, image:"🧁"},
         {name:"Lacchi", price:100, image:"🥤"}, {name:"Cold Coffee", price:100, image:"🥤"}, {name:"Strawberry Milk Shake", price:100, image:"🥤"},
         {name:"Kabab Burger", price:100, image:"🍔"}, {name:"Sub Sandwich", price:100, image:"🥪"}, {name:"Kabab Cheese Burger", price:130, image:"🍔"}, {name:"Cheese Sub Sandwich", price:130, image:"🥪"}, {name:"Kabab Wrap", price:80, image:"🌯"},
@@ -150,14 +301,12 @@
         {name:"Chicken Momo", price:100, image:"🥟"}, {name:"Chicken Cheese Momo", price:130, image:"🥟"},
         {name:"Chicken Shingara", price:80, image:"🥟"}, {name:"Chicken Shomucha", price:80, image:"🥟"}
       ]},
-
-      { id: 2, name: "Sip & Slay Bistro", cat: "cafe", items: [
+      { id: 2, name: "Sip & Slay Bistro", cat: "food", items: [
         {name:"Lemon mint mojito", price:70, image:"🍹"}, {name:"Strawberry mojito", price:120, image:"🍹"}, {name:"Blue coconut rice bubble", price:200, image:"🥥"}, {name:"Iced latte", price:150, image:"☕"}, {name:"Regular cold coffee", price:100, image:"☕"},
         {name:"Chicken momos with chilli oil dip (8pcs)", price:150, image:"🥟"}, {name:"Chicken nuggets (8-10 pcs)", price:180, image:"🍗"}, {name:"French fries", price:100, image:"🍟"}, {name:"Naga chicken patty burger", price:170, image:"🍔"}, {name:"Regular Chicken cheese burger", price:150, image:"🍔"}, {name:"Spicy pasta", price:180, image:"🍝"}, {name:"Chicken strips with dip (5 pcs)", price:100, image:"🍗"}, {name:"Meat box", price:180, image:"🥩"},
         {name:"Seasonal fruit cake (1 Pound)", price:1000, image:"🍰"}
       ]},
-
-      { id: 3, name: "Cafe Time Out", cat: "cafe", items: [
+      { id: 3, name: "Cafe Time Out", cat: "food", items: [
         {name:"Espresso", price:120, image:"☕"}, {name:"Americano", price:150, image:"☕"}, {name:"Latte", price:199, image:"☕"}, {name:"Cappuccino", price:180, image:"☕"}, {name:"Mocha", price:240, image:"☕"}, {name:"Iced Americano", price:170, image:"☕"}, {name:"Iced Latte", price:220, image:"☕"}, {name:"Iced Cappuccino", price:230, image:"☕"}, {name:"Iced Mocha", price:250, image:"☕"}, {name:"Ice Tea", price:140, image:"🧊"}, {name:"Blue ocean", price:210, image:"🧊"}, {name:"Classic mojito", price:190, image:"🍹"}, {name:"Cosmopolitan", price:220, image:"🍹"}, {name:"Coconut margarita", price:210, image:"🍹"}, {name:"Margarita", price:160, image:"🍹"},
         {name:"Cold Coffee", price:200, image:"☕"}, {name:"Orio Shake", price:210, image:"🥤"}, {name:"Lacchi", price:160, image:"🥤"}, {name:"Milk Shake", price:150, image:"🥤"}, {name:"Chocolate Shake", price:180, image:"🥤"},
         {name:"Cream of mushroom soup", price:290, image:"🍲"}, {name:"Creamy chicken mushroom soup", price:360, image:"🍲"}, {name:"Thai soup", price:220, image:"🍲"}, {name:"Clear vegetables soup", price:199, image:"🍲"},
@@ -176,8 +325,7 @@
         {name:"French Fry", price:99, image:"🍟"}, {name:"Wedges", price:110, image:"🍟"}, {name:"Spicy Garlic mushroom", price:280, image:"🍄"}, {name:"Chicken strips", price:280, image:"🍗"}, {name:"Chicken Nachos", price:250, image:"🌮"}, {name:"BBQ wings 6p", price:350, image:"🍗"}, {name:"Thai Fried Chicken 6p", price:380, image:"🍗"}, {name:"Fried Calamari", price:290, image:"🦑"}, {name:"Chicken Meatbox", price:230, image:"🥩"},
         {name:"Chicken Sub Sandwich", price:170, image:"🥪"}, {name:"BBQ Sub Sandwich", price:199, image:"🥪"}, {name:"Naga Sub Sandwich", price:170, image:"🥪"}, {name:"BBQ Burger", price:250, image:"🍔"}, {name:"Naga Burger", price:220, image:"🍔"}, {name:"Crispy Chicken burger", price:210, image:"🍔"}, {name:"Juicy Lucy Chicken burger", price:280, image:"🍔"}, {name:"Classic Chicken burger", price:250, image:"🍔"}, {name:"Grilled Chicken burger", price:299, image:"🍔"}, {name:"Chicken Cheese blast burger", price:299, image:"🍔"}
       ]},
-      
-      { id: 4, name: "Kacchi Ghor", cat: "kacchi", items: [
+      { id: 4, name: "Kacchi Ghor", cat: "food", items: [
         {name:"Matin Chui Jhal (Sada Bhat + Daal)", price:270, image:"🍛"}, {name:"Sarisha Ilish (Sada Bhat + Daal)", price:320, image:"🍛"}, {name:"Sarisha Chingri (Sada Bhat + Daal)", price:290, image:"🍛"},
         {name:"Dal Bhuna", price:65, image:"🍛"}, {name:"Alur Bhuna", price:65, image:"🍛"}, {name:"Tomato Bhuna", price:65, image:"🍛"}, {name:"Begun Bhuna", price:65, image:"🍛"}, {name:"Daal (Plate)", price:50, image:"🍛"},
         {name:"Mach Bhuna", price:20, image:"🍛"}, {name:"Dim Bhuna", price:20, image:"🍛"}, {name:"Chingri Bhuna", price:20, image:"🍛"}, {name:"Shutir Bhuna", price:80, image:"🍛"}, {name:"Sada Bhat", price:70, image:"🍛"},
@@ -188,8 +336,7 @@
         {name:"Mutton Kacchi (Basmati+Special) 2P", price:950, image:"🍗"}, {name:"Mutton Kacchi (Basmati+Special) 4P", price:1880, image:"🍗"}, {name:"Mutton Kacchi (Basmati+Special) 6P", price:2800, image:"🍗"},
         {name:"Bashmati Rice", price:100, image:"🍚"}, {name:"Plain Polaw", price:60, image:"🍚"}, {name:"Mutton (Addon)", price:120, image:"🍗"}, {name:"Jali Kabab", price:50, image:"🍢"}, {name:"Egg", price:20, image:"🥚"}
       ]},
-
-      { id: 5, name: "Hungry Hut", cat: "burger", items: [
+      { id: 5, name: "Hungry Hut", cat: "food", items: [
         {name:"Crispy Fried Chicken (1pc)", price:90, image:"🍗"}, {name:"Spicy Fried Chicken (1pc)", price:100, image:"🍗"}, {name:"Thai Fried Chicken", price:170, image:"🍗"}, {name:"Chicken Lollipop (4pcs)", price:200, image:"🍗"}, {name:"BBQ Wings (6pcs)", price:200, image:"🍗"}, {name:"French Fry", price:70, image:"🍟"}, {name:"Potato Wedges", price:80, image:"🍟"}, {name:"Fish & Chips", price:150, image:"🐟"},
         {name:"Chicken Sub Sandwich", price:100, image:"🥪"}, {name:"Chicken Cheese Sandwich", price:150, image:"🥪"}, {name:"Chicken Naga Sandwich", price:120, image:"🥪"},
         {name:"Wonton (4pcs)", price:80, image:"🥟"}, {name:"Nachos", price:200, image:"🌮"}, {name:"Chilli Nachos", price:250, image:"🌮"},
@@ -208,8 +355,7 @@
         {name:"Chicken Pizza 8inch", price:250, image:"🍕"}, {name:"Chicken Pizza 10inch", price:350, image:"🍕"}, {name:"Chicken Pizza 12inch", price:450, image:"🍕"}, {name:"BBQ Chicken Pizza 8inch", price:280, image:"🍕"}, {name:"BBQ Chicken Pizza 10inch", price:380, image:"🍕"}, {name:"BBQ Chicken Pizza 12inch", price:480, image:"🍕"},
         {name:"Combo 1 (Burger+Fries+Drinks)", price:250, image:"🍱"}, {name:"Combo 2 (Chicken Fry+Drinks)", price:250, image:"🍱"}
       ]},
-      
-      { id: 6, name: "Cafe Dua", cat: "cafe", items: [
+      { id: 6, name: "Cafe Dua", cat: "food", items: [
         {name:"Orange Mojito", price:100, image:"🍹"}, {name:"Lemon Mojito", price:100, image:"🍹"}, {name:"Mango Mojito", price:100, image:"🍹"}, {name:"Strawberry Mojito", price:100, image:"🍹"}, {name:"Blueberry Mojito", price:100, image:"🍹"}, {name:"Blue Ocean Mojito", price:100, image:"🍹"},
         {name:"Banana Lassi", price:100, image:"🥤"}, {name:"Mango Lassi", price:100, image:"🥤"}, {name:"Regular Lassi", price:100, image:"🥤"},
         {name:"Banana Smoothie", price:120, image:"🥤"}, {name:"Mango Smoothie", price:120, image:"🥤"}, {name:"Strawberry Smoothie", price:120, image:"🥤"}, {name:"Blueberry Smoothie", price:120, image:"🥤"}, {name:"Butterscotch Shake", price:150, image:"🥤"}, {name:"Oreo Shake", price:150, image:"🥤"}, {name:"Chocolate Milkshake", price:150, image:"🥤"}, {name:"Kitkat Shake", price:170, image:"🥤"},
@@ -224,8 +370,7 @@
         {name:"Grilled Egg Sandwich", price:100, image:"🥪"}, {name:"BBQ Chicken Wrap", price:180, image:"🌯"}, {name:"Spicy Naga Chicken Wrap", price:190, image:"🌯"}, {name:"Club Sandwich", price:200, image:"🥪"}, {name:"Cheese Club Sandwich", price:220, image:"🥪"}, {name:"BBQ Chicken Sandwich", price:210, image:"🥪"},
         {name:"Combo 1 (Chicken Patty Burger+Fries+Lemon Juice)", price:250, image:"🍱"}, {name:"Combo 2 (Club Sandwich+Chocolate Cold Coffee)", price:350, image:"🍱"}, {name:"Combo 3 (Chicken Fry+Wedges+Lassi)", price:380, image:"🍱"}, {name:"Combo 4 (Crispy Wings+Chocolate Cold Coffee)", price:390, image:"🍱"}
       ]},
-      
-      { id: 7, name: "MBB", cat: "burger", items: [
+      { id: 7, name: "MBB", cat: "food", items: [
         {name:"Regular Meatbox", price:120, image:"🥩"}, {name:"Naga Meatbox", price:140, image:"🥩"}, {name:"BBQ Meatbox", price:170, image:"🥩"}, {name:"Cheese Meatbox", price:200, image:"🥩"}, {name:"Mushroom Meatbox", price:250, image:"🥩"}, {name:"MBB Special Meatbox", price:300, image:"🥩"},
         {name:"Old School Mini", price:60, image:"🍔"}, {name:"The Heat Seeker", price:80, image:"🍔"}, {name:"The Crunchmaster", price:120, image:"🍔"}, {name:"The Cheese Master", price:160, image:"🍔"}, {name:"Cheese Master Special", price:180, image:"🍔"}, {name:"BBQ Burger", price:150, image:"🍔"}, {name:"BBQ Special Burger", price:180, image:"🍔"}, {name:"MBB Special Burger", price:250, image:"🍔"},
         {name:"Paratha Shawarma", price:110, image:"🌯"}, {name:"Naga Shawarma", price:130, image:"🌯"}, {name:"Paratha Cheese Shawarma", price:150, image:"🌯"}, {name:"Chicken Shawarma", price:140, image:"🌯"}, {name:"Naga Shawarma (Naans)", price:170, image:"🌯"}, {name:"Cheese Shawarma", price:170, image:"🌯"},
@@ -234,8 +379,7 @@
         {name:"French Fry", price:60, image:"🍟"}, {name:"Chicken Fry", price:70, image:"🍗"}, {name:"Crispy Wings (6pcs)", price:130, image:"🍗"}, {name:"BBQ Wings (6pcs)", price:150, image:"🍗"}, {name:"Chicken Popcorn", price:160, image:"🍗"}, {name:"Chicken Strip", price:150, image:"🍗"}, {name:"Nachos", price:180, image:"🌮"}, {name:"MBB Special Nachos", price:230, image:"🌮"},
         {name:"Lemon Mint Mojito", price:60, image:"🍹"}, {name:"Pulse Mojito", price:80, image:"🍹"}, {name:"Blue Lagoon Mojito", price:100, image:"🍹"}, {name:"Milk Shake", price:120, image:"🥤"}, {name:"Banana Shake", price:120, image:"🥤"}, {name:"Mango Shake", price:130, image:"🥤"}, {name:"Chocolate Shake", price:150, image:"🥤"}, {name:"Oreo Shake", price:160, image:"🥤"}, {name:"Kitkat Shake", price:180, image:"🥤"}, {name:"Classic Cold Coffee", price:120, image:"☕"}, {name:"Cold Coffee with Ice Cream", price:150, image:"☕"}, {name:"Chocolate Cold Coffee", price:150, image:"☕"}, {name:"Iced Cold Coffee", price:170, image:"☕"}, {name:"Mango Juice", price:100, image:"🍹"}, {name:"Orange Juice", price:100, image:"🍹"}, {name:"Watermelon Juice", price:100, image:"🍹"}
       ]},
-      
-      { id: 8, name: "Chill N Fill", cat: "cafe", items: [
+      { id: 8, name: "Chill N Fill", cat: "food", items: [
         {name:"Chicken Patty Burger", price:150, image:"🍔"}, {name:"Crispy Chicken Burger", price:170, image:"🍔"}, {name:"Chicken Cheese Burger", price:200, image:"🍔"},
         {name:"Combo 1 (Burger+Fries+Drinks)", price:210, image:"🍱"}, {name:"Combo 2 (Burger+Fries+Drinks)", price:230, image:"🍱"}, {name:"Combo 3 (Burger+Fries+Drinks)", price:300, image:"🍱"},
         {name:"Chicken Shawarma", price:150, image:"🌯"}, {name:"Chicken BBQ Shawarma", price:170, image:"🌯"},
@@ -246,8 +390,7 @@
         {name:"Chicken Chowmein (1:2)", price:250, image:"🍜"}, {name:"Chicken Chowmein (1:3)", price:350, image:"🍜"}, {name:"Vegetable Chowmein (1:2)", price:200, image:"🍜"}, {name:"Vegetable Chowmein (1:3)", price:270, image:"🍜"}, {name:"Special Chowmein (1:2)", price:300, image:"🍜"}, {name:"Special Chowmein (1:3)", price:450, image:"🍜"},
         {name:"Oven Baked Pasta", price:280, image:"🍝"}
       ]},
-      
-      { id: 9, name: "Food Squad", cat: "burger", items: [
+      { id: 9, name: "Food Squad", cat: "food", items: [
         {name:"Crispy Fried Chicken (6pcs mini)", price:170, image:"🍗"}, {name:"Spicy Fried Chicken (6pcs mini)", price:199, image:"🍗"}, {name:"Pop Chicken (10 pcs)", price:130, image:"🍗"}, {name:"Chicken Strips (10 pcs)", price:149, image:"🍗"}, {name:"Chicken Shaslik (3pcs)", price:149, image:"🍗"}, {name:"Potato Wedges (10pcs)", price:99, image:"🍟"}, {name:"Cheese French Fry", price:139, image:"🍟"}, {name:"French Fry", price:99, image:"🍟"}, {name:"Loaded French Fries", price:220, image:"🍟"}, {name:"Wonton (8ps)", price:120, image:"🥟"},
         {name:"BBQ Chicken Cheese Burger", price:160, image:"🍔"}, {name:"Chicken Cheese Burger", price:140, image:"🍔"}, {name:"Crispy Chicken Cheese Burger", price:150, image:"🍔"}, {name:"Naga King Burger", price:150, image:"🍔"}, {name:"American Burger", price:230, image:"🍔"},
         {name:"Chicken Club Sandwich", price:140, image:"🥪"}, {name:"American Crispy Club Sandwich", price:239, image:"🥪"}, {name:"Crispy Cheese Sub", price:150, image:"🥪"},
@@ -261,8 +404,7 @@
         {name:"Crispy Rice Bowl", price:119, image:"🍚"}, {name:"BBQ Rice Bowl", price:139, image:"🍚"}, {name:"Chicken Cheese Cutlet Rice Bowl", price:189, image:"🍚"},
         {name:"BBQ Pizza 8inch", price:450, image:"🍕"}, {name:"BBQ Pizza 12inch", price:600, image:"🍕"}, {name:"Home Special Pizza 8inch", price:520, image:"🍕"}, {name:"Home Special Pizza 12inch", price:800, image:"🍕"}
       ]},
-      
-      { id: 10, name: "Flaming Dine", cat: "pizza", items: [
+      { id: 10, name: "Flaming Dine", cat: "food", items: [
         {name:"Chicken Steak Platter", price:450, image:"🍗"}, {name:"Szechuan Platter", price:320, image:"🍗"}, {name:"BBQ Grilled Chicken Platter", price:390, image:"🍗"}, {name:"Honey Mustard Grilled Chicken Platter", price:390, image:"🍗"},
         {name:"Chicken Dominator Pizza 8inch", price:420, image:"🍕"}, {name:"Chicken Dominator Pizza 10inch", price:500, image:"🍕"}, {name:"Chicken Dominator Pizza 12inch", price:720, image:"🍕"},
         {name:"BBQ Pizza 8inch", price:460, image:"🍕"}, {name:"BBQ Pizza 10inch", price:590, image:"🍕"}, {name:"BBQ Pizza 12inch", price:780, image:"🍕"},
@@ -279,16 +421,14 @@
         {name:"Chicken Chowmein (1:1)", price:170, image:"🍜"}, {name:"Chicken Chowmein (1:3)", price:380, image:"🍜"}, {name:"Vegetable Chowmein (1:1)", price:150, image:"🍜"}, {name:"Vegetable Chowmein (1:3)", price:330, image:"🍜"},
         {name:"Oven Baked Pasta", price:290, image:"🍝"}, {name:"Oven Baked Naga Pasta", price:270, image:"🍝"}, {name:"White Sauce Pasta", price:230, image:"🍝"}, {name:"Red Sauce Pasta", price:190, image:"🍝"}
       ]},
-      
-      { id: 11, name: "Black Pepper", cat: "drinks", items: [
+      { id: 11, name: "Black Pepper", cat: "food", items: [
         {name:"Strawberry Mojito", price:120, image:"🍹"}, {name:"Orange Mojito", price:120, image:"🍹"}, {name:"Blueberry Mojito", price:120, image:"🍹"}, {name:"Blue Ocean Mojito", price:120, image:"🍹"}, {name:"Mango Mojito", price:120, image:"🍹"}, {name:"Lemon Mojito", price:120, image:"🍹"},
         {name:"Salt Lassi", price:100, image:"🥤"}, {name:"Mango Lassi", price:120, image:"🥤"}, {name:"Banana Lassi", price:120, image:"🥤"}, {name:"Regular Lassi", price:100, image:"🥤"}, {name:"Nut Lassi", price:150, image:"🥤"},
         {name:"Strawberry Shake", price:150, image:"🥤"}, {name:"Blueberry Shake", price:150, image:"🥤"}, {name:"Mango Shake", price:150, image:"🥤"}, {name:"Banana Shake", price:150, image:"🥤"}, {name:"Oreo Milk Shake", price:160, image:"🥤"}, {name:"Butterscotch Shake", price:170, image:"🥤"}, {name:"Milk Nut Shake", price:170, image:"🥤"}, {name:"Chocolate Shake", price:150, image:"🥤"}, {name:"Caramel Shake", price:160, image:"🥤"}, {name:"Mint Milk Shake", price:150, image:"🥤"}, {name:"Kitkat Shake", price:190, image:"🥤"},
         {name:"Coffee Latte", price:150, image:"☕"}, {name:"Cold Coffee", price:120, image:"☕"}, {name:"Brazilian Lemonade", price:100, image:"🍹"}, {name:"Hot Coffee", price:90, image:"☕"}, {name:"Black Coffee", price:70, image:"☕"}, {name:"Ice Tea", price:60, image:"🧊"}, {name:"Tea", price:40, image:"☕"}, {name:"Lemon Mint", price:40, image:"🍹"},
         {name:"Regular Boba", price:50, image:"🧋"}, {name:"Boba Tea", price:150, image:"🧋"}, {name:"Strawberry Boba", price:250, image:"🧋"}, {name:"Blueberry Boba", price:250, image:"🧋"}, {name:"Mango Boba", price:250, image:"🧋"}, {name:"Banana Boba", price:200, image:"🧋"}, {name:"Oreo Boba", price:210, image:"🧋"}, {name:"Butterscotch Boba", price:270, image:"🧋"}, {name:"Milk Nut Boba", price:250, image:"🧋"}, {name:"Chocolate Boba", price:200, image:"🧋"}, {name:"Caramel Boba", price:210, image:"🧋"}, {name:"Kitkat Boba", price:250, image:"🧋"}
       ]},
-      
-      { id: 12, name: "Rosoi Ghor", cat: "pizza", items: [
+      { id: 12, name: "Rosoi Ghor", cat: "food", items: [
         {name:"Chicken Fajita Pizza 8inch", price:1050, image:"🍕"}, {name:"Chicken Fajita Pizza 10inch", price:1300, image:"🍕"}, {name:"Chicken Fajita Pizza 12inch", price:1420, image:"🍕"},
         {name:"Rosoi Ghor Special BBQ Chicken Pan Pizza 8inch", price:1150, image:"🍕"}, {name:"Rosoi Ghor Special BBQ Chicken Pan Pizza 10inch", price:1400, image:"🍕"}, {name:"Rosoi Ghor Special BBQ Chicken Pan Pizza 12inch", price:1520, image:"🍕"},
         {name:"Chef Signature Chicken Pizza 10inch", price:850, image:"🍕"}, {name:"Chef Signature Chicken Pizza 12inch", price:950, image:"🍕"}, {name:"Vegetable Pizza 10inch", price:800, image:"🍕"},
@@ -308,8 +448,7 @@
         {name:"Thai Soup (1:1)", price:200, image:"🍲"}, {name:"Chicken Thai Soup (1:3)", price:350, image:"🍲"}, {name:"Rosoi Ghor Special Thai Soup (1:3)", price:450, image:"🍲"}, {name:"Thai Clear Soup (1:3)", price:280, image:"🍲"}, {name:"Chicken Corn Soup (1:3)", price:300, image:"🍲"}, {name:"Shishuon Soup (1:3)", price:380, image:"🍲"}, {name:"Chicken Vegetable Soup (1:3)", price:300, image:"🍲"}, {name:"Hot and Sour Soup (1:3)", price:300, image:"🍲"},
         {name:"Chicken Chowmein (1:3)", price:300, image:"🍜"}, {name:"Prawn Chowmein (1:3)", price:450, image:"🍜"}, {name:"Rosoi Ghor Special Chowmein (1:3)", price:550, image:"🍜"}, {name:"Thai Noodles (1:3)", price:380, image:"🍜"}, {name:"American Noodles (1:3)", price:360, image:"🍜"}, {name:"American Chopsy (1:3)", price:400, image:"🍜"}, {name:"Vegetable Chowmein (1:3)", price:260, image:"🍜"}
       ]},
-      
-      { id: 13, name: "Cafe Jingbang", cat: "cafe", items: [
+      { id: 13, name: "Cafe Jingbang", cat: "food", items: [
         {name:"Regular Fuchka (6pcs)", price:60, image:"🍢"}, {name:"Special Doi Fuchka (6pcs)", price:120, image:"🍢"}, {name:"Naga Fuchka (6pcs)", price:80, image:"🍢"}, {name:"Chicken Fuchka (6pcs)", price:100, image:"🍢"}, {name:"Doi Fuchka", price:100, image:"🍢"}, {name:"Beef Fuchka", price:60, image:"🍢"}, {name:"Chocolate Fuchka", price:100, image:"🍢"},
         {name:"Regular Chotpoti", price:60, image:"🍲"}, {name:"Naga Chotpoti", price:70, image:"🍲"}, {name:"Chicken Chotpoti", price:100, image:"🍲"}, {name:"Nababi Chotpoti", price:100, image:"🍲"},
         {name:"Chicken Chowmein (1:2)", price:150, image:"🍜"}, {name:"Chicken Chowmein (1:3)", price:250, image:"🍜"}, {name:"Egg Chowmein (1:2)", price:130, image:"🍜"}, {name:"Egg Chowmein (1:3)", price:200, image:"🍜"}, {name:"Shahi Chowmein (1:2)", price:150, image:"🍜"}, {name:"Shahi Chowmein (1:3)", price:250, image:"🍜"},
@@ -322,13 +461,107 @@
         {name:"Coca Cola", price:80, image:"🥤"}, {name:"Sprite", price:80, image:"🥤"},
         {name:"Dudh Cha", price:20, image:"☕"}, {name:"Rong Cha", price:20, image:"☕"}, {name:"Chak", price:30, image:"☕"}, {name:"Ruti Kofi", price:60, image:"☕"}, {name:"Cold Coffee", price:100, image:"☕"}
       ]},
-      
-      { id: 14, name: "Chumuk", cat: "drinks", items: [
+      { id: 14, name: "Chumuk", cat: "food", items: [
         {name:"Chicken Momo (6 Pcs)", price:120, image:"🥟"}, {name:"Chicken Roll", price:100, image:"🌯"}, {name:"Chicken Singara (6 Pcs)", price:150, image:"🥟"}, {name:"Chicken Fry (6 Pcs)", price:300, image:"🍗"}, {name:"Chicken Chowmein (1:3)", price:270, image:"🍜"}, {name:"Chicken Masala (1:3)", price:350, image:"🍛"}, {name:"Chicken Chaap (1:1)", price:150, image:"🍗"}, {name:"Chicken Pakora (10 Pcs)", price:200, image:"🍗"}, {name:"Chicken Popcorn (25 Pcs)", price:200, image:"🍗"}, {name:"Momo Soup (1:3)", price:350, image:"🍲"}, {name:"Thai Soup (1:3)", price:380, image:"🍲"}, {name:"Parota (1 Pcs)", price:15, image:"🍞"}, {name:"Khasir Paya + Parota (2Pcs) (1:1)", price:160, image:"🍲"}, {name:"Lassi", price:90, image:"🥤"}, {name:"Cold Coffee", price:110, image:"☕"}, {name:"Milkshake", price:130, image:"🥤"}, {name:"Milk Tea", price:25, image:"☕"}, {name:"Black Tea", price:15, image:"☕"}, {name:"Fish Fry (per plate)", price:200, image:"🐟"}
+      ]},
+      
+      // --- 2. GROCERY CATEGORY ---
+      { id: 15, name: "🛒 বাজার (Grocery)", cat: "grocery", items: [
+        {name: "চাল (Rice) - ১ কেজি", price: 0, image: "🍚"},
+        {name: "বাসমতি চাল (Basmati) - ৫০০ গ্রাম", price: 0, image: "🍚"},
+        {name: "মসুর ডাল (Masur Dal) - ২৫০ গ্রাম", price: 0, image: "🫘"},
+        {name: "আটা/ময়দা (Flour) - ১ কেজি", price: 0, image: "🥖"},
+        {name: "সয়াবিন তেল (Soybean) - ৫০০ মিলি", price: 0, image: "🫒"},
+        {name: "সরিষার তেল (Mustard) - ২৫০ মিলি", price: 0, image: "🫒"},
+        {name: "লবণ (Salt) - ৫০০ গ্রাম", price: 0, image: "🧂"},
+        {name: "মশলা মিক্স (Spice Mix) - ১০০ গ্রাম", price: 0, image: "🧂"},
+        {name: "জিরা/ধনে (Cumin/Dhone) - ৫০ গ্রাম", price: 0, image: "🧂"},
+        {name: "শুকনা মরিচ (Dry Red Chili) - ১০০ গ্রাম", price: 0, image: "🌶️"},
+        {name: "চিনি (Sugar) - ১ কেজি", price: 0, image: "🍬"},
+        {name: "গুড় (Gur) - ৫০০ গ্রাম", price: 0, image: "🍬"},
+        {name: "কোমল পানীয় (Drinks) - ২৫০ মিলি", price: 0, image: "🥤"},
+        {name: "কফি (Coffee) - ১০০ গ্রাম", price: 0, image: "☕"},
+        {name: "কফি (Coffee) - ২৫০ গ্রাম", price: 0, image: "☕"},
+        {name: "চা পাতা (Tea Leaves) - ১০০ গ্রাম", price: 0, image: "🍵"},
+        {name: "নুডলস (Noodles) - ১ প্যাক", price: 0, image: "🍜"},
+        {name: "বাদাম (Peanuts) - ১০০ গ্রাম", price: 0, image: "🥜"},
+        {name: "খেজুর (Dates) - ৫০০ গ্রাম", price: 0, image: "🌴"},
+        {name: "ডিম (Eggs) - ১ পিস", price: 0, image: "🥚"},
+        {name: "লিকুইড দুধ (Liquid Milk) - ১ লিটার", price: 0, image: "🥛"},
+        {name: "গুঁড়া দুধ (Milk Powder) - ১ প্যাক", price: 0, image: "🥛"},
+        {name: "গরুর তাজা দুধ (Cow Milk) - ১ লিটার", price: 0, image: "🥛"},
+        {name: "দই (Doi) - ৫০০ গ্রাম", price: 0, image: "🍦"},
+        {name: "দই (Doi) - ১ পিস", price: 0, image: "🍦"},
+        {name: "ব্রয়লার মুরগি (Broiler Chicken) - ১ কেজি", price: 0, image: "🍗"},
+        {name: "গরুর মাংস (Beef) - ১ কেজি", price: 0, image: "🍖"},
+        {name: "রুই মাছ (Rui Fish) - ৫০০ গ্রাম", price: 0, image: "🐟"},
+        {name: "কলা (Banana) - ১ পিস", price: 0, image: "🍌"},
+        {name: "আপেল (Apple) - ৫০০ গ্রাম", price: 0, image: "🍎"},
+        {name: "কমলা (Orange) - ৫০০ গ্রাম", price: 0, image: "🍊"},
+        {name: "লাল আঙ্গুর (Red Grapes) - ২৫০ গ্রাম", price: 0, image: "🍇"},
+        {name: "সবুজ আঙ্গুর (Green Grapes) - ২৫০ গ্রাম", price: 0, image: "🍇"},
+        {name: "লাক্স সাবান (Lux Soap) - ১ পিস", price: 0, image: "🧼"},
+        {name: "লাইফবয় সাবান (Lifebuoy) - ১ পিস", price: 0, image: "🧼"},
+        {name: "ডেটল সাবান (Dettol) - ১ পিস", price: 0, image: "🧼"},
+        {name: "স্যান্ডাল সাবান (Sandal) - ১ পিস", price: 0, image: "🧼"},
+        {name: "মাইসোর সাবান (Mysore) - ১ পিস", price: 0, image: "🧼"},
+        {name: "সার্ফ এক্সেল (Surf Excel) - ২৫০ গ্রাম", price: 0, image: "🧺"},
+        {name: "হুইল পাউডার (Wheel) - ২৫০ গ্রাম", price: 0, image: "🧺"},
+        {name: "টাইড পাউডার (Tide) - ২৫০ গ্রাম", price: 0, image: "🧺"},
+        {name: "রিন পাউডার (Rin) - ২৫০ গ্রাম", price: 0, image: "🧺"},
+        {name: "এরিয়েল পাউডার (Ariel) - ২৫০ গ্রাম", price: 0, image: "🧺"},
+        {name: "মশার কয়েল (Mosquito Coil) - ১ প্যাক", price: 0, image: "🪬"},
+        {name: "স্পেশাল কয়েল (Special Coil) - ১ প্যাক", price: 0, image: "🪬"},
+        {name: "টয়লেট পেপার (Toilet Paper) - ১ রোল", price: 0, image: "🧻"},
+        {name: "হ্যান্ড টাওয়েল (Hand Towel) - ১ প্যাক", price: 0, image: "🧻"},
+        {name: "টিস্যু বক্স (Tissue Box) - ১ বক্স", price: 0, image: "🧻"}
+      ]},
+      
+      // --- 3. VEGETABLES CATEGORY ---
+      { id: 16, name: "🥦 তাজা সবজি (Vegetables)", cat: "vegetables", items: [
+        {name: "টমেটো (Tomato) - ৫০০ গ্রাম", price: 0, image: "🍅"},
+        {name: "বাঁধাকপি (Cabbage) - ১ পিস", price: 0, image: "🥬"},
+        {name: "ফুলকপি (Cauliflower) - ১ পিস", price: 0, image: "🥦"},
+        {name: "লাউ/ঝিঙা (Lau/Jhinga) - ৫০০ গ্রাম", price: 0, image: "🥒"},
+        {name: "মিষ্টি কুমড়া (Sweet Pumpkin) - ৫০০ গ্রাম", price: 0, image: "🎃"}
+      ]},
+      
+      // --- 4. MEDICINE CATEGORY ---
+      { id: 17, name: "💊 ওষুধ (Medicine)", cat: "medicine", items: [
+        {name: "নাপা (Napa) - ১ ট্যাব", price: 0, image: "💊"},
+        {name: "এসি (Ace) - ১ ট্যাব", price: 0, image: "💊"},
+        {name: "এন্টাসিড (Antacid) - ১ ট্যাব", price: 0, image: "💊"},
+        {name: "কাশির সিরাপ (Cough Syrup) - ১০০ মিলি", price: 0, image: "🍬"},
+        {name: "ভিটামিন সি (Vitamin C) - ১ ট্যাব", price: 0, image: "🧪"},
+        {name: "ওআরএস (ORS) - ১ প্যাক", price: 0, image: "🧂"},
+        {name: "এন্টিহিস্টামিন (Antihistamine) - ১ ট্যাব", price: 0, image: "💊"},
+        {name: "এন্টিবায়োটিক (Antibiotic) - ১ ক্যাপসুল", price: 0, image: "💊"},
+        {name: "আই ড্রপ (Eye Drops)", price: 0, image: "💧"},
+        {name: "প্লাস্টার (Bandage)", price: 0, image: "🩹"},
+        {name: "হ্যান্ড স্যানিটাইজার (Sanitizer) - ১০০ মিলি", price: 0, image: "🧴"}
+      ]},
+      
+      // --- 5. BISCUITS CATEGORY ---
+      { id: 18, name: "🍪 বিস্কুট (Biscuits)", cat: "biscuits", items: [
+        {name: "পার্লে জি (Parle G) - ১ প্যাক", price: 0, image: "🍪"},
+        {name: "মেরি গোল্ড (Marie Gold) - ১ প্যাক", price: 0, image: "🍪"},
+        {name: "ক্রিম বিস্কুট (Cream Biscuit) - ১ প্যাক", price: 0, image: "🍪"},
+        {name: "প্রাণ কেক (Pran Cake) - ১ প্যাক", price: 0, image: "🍰"},
+        {name: "চকলেট বিস্কুট (Choco Biscuit) - ১ প্যাক", price: 0, image: "🍪"},
+        {name: "বাটার বিস্কুট (Butter Biscuit) - ১ প্যাক", price: 0, image: "🍪"},
+        {name: "নাবিসকো হুইট (Nabisco Wheat) - ১ প্যাক", price: 0, image: "🍪"},
+        {name: "নারকেল বিস্কুট (Coconut Biscuit) - ১ প্যাক", price: 0, image: "🍪"},
+        {name: "গ্লুকোজ বিস্কুট (Glucose Biscuit) - ১ প্যাক", price: 0, image: "🍪"},
+        {name: "নাইস বিস্কুট (Nice Biscuit) - ১ প্যাক", price: 0, image: "🍪"},
+        {name: "ওরিও (Oreo) - ১ প্যাক", price: 0, image: "🍪"},
+        {name: "পিস্তা বিস্কুট (Pista Biscuit) - ১ প্যাক", price: 0, image: "🍪"},
+        {name: "কাজু বিস্কুট (Kaju Biscuit) - ১ প্যাক", price: 0, image: "🍪"},
+        {name: "ভিটা ক্র্যাকার (Vita Crackers) - ১ প্যাক", price: 0, image: "🍪"},
+        {name: "লবণ বিস্কুট (Salt Biscuit) - ১ প্যাক", price: 0, image: "🍪"}
       ]}
     ];
 
-    // ---------- STATE ----------
+    // ------------------ CART & APP LOGIC ------------------
     let cart = {};
     let currentRestoId = null;
     let activeCategory = 'all';
@@ -346,7 +579,6 @@
     const searchInput = document.getElementById('searchInput');
     const catItems = document.querySelectorAll('.cat-item');
 
-    // ---------- RENDER RESTAURANTS ----------
     function renderRestaurants() {
       let filtered = restaurantData;
       if (activeCategory !== 'all') filtered = filtered.filter(r => r.cat === activeCategory);
@@ -356,7 +588,7 @@
         <div class="resto-card" data-restoid="${r.id}">
           <h3>${r.name}</h3>
           <p>${r.items.length} items</p>
-          <div class="badge">${r.cat === 'burger' ? '🍔' : r.cat === 'pizza' ? '🍕' : r.cat === 'kacchi' ? '🍗' : r.cat === 'cafe' ? '☕' : r.cat === 'drinks' ? '🥤' : '🍰'}</div>
+          <div class="badge">${r.cat === 'food' ? '🍔' : r.cat === 'grocery' ? '🛒' : r.cat === 'vegetables' ? '🥦' : r.cat === 'medicine' ? '💊' : r.cat === 'biscuits' ? '🍪' : '🍰'}</div>
         </div>
       `).join('');
 
@@ -367,32 +599,33 @@
       });
     }
 
-    // ---------- OPEN MENU ----------
     function openMenu(restoId) {
       const resto = restaurantData.find(r => r.id === restoId);
       if (!resto) return;
       currentRestoId = restoId;
       menuRestoName.textContent = resto.name;
-      menuRestoSub.textContent = `Restaurant: ${resto.name}`;
-
-      menuItemsList.innerHTML = resto.items.map((item, idx) => `
-        <div class="menu-item">
-          <div class="img-placeholder">${item.image}</div>
-          <div class="menu-item-info">
-            <h4>${item.name}</h4>
-            <p>৳ ${item.price}</p>
+      menuRestoSub.textContent = `Shop: ${resto.name}`;
+      
+      menuItemsList.innerHTML = resto.items.map((item, idx) => {
+        const priceText = (item.price === 0 || !item.price) ? "বাজার দর" : `৳ ${item.price}`;
+        return `
+          <div class="menu-item">
+            <div class="img-placeholder">${item.image}</div>
+            <div class="menu-item-info">
+              <h4>${item.name}</h4>
+              <div class="item-price">${priceText}</div>
+            </div>
+            <button data-restoid="${restoId}" data-name="${item.name}" data-price="${item.price}">+ Add</button>
           </div>
-          <button data-restoid="${restoId}" data-name="${item.name}" data-price="${item.price}">+ Add</button>
-        </div>
-      `).join('');
-
+        `;
+      }).join('');
+      
       menuItemsList.querySelectorAll('button').forEach(btn => {
         btn.addEventListener('click', function() {
           addToCart(parseInt(this.dataset.restoid), this.dataset.name, parseInt(this.dataset.price));
           renderCart();
         });
       });
-
       menuPanel.classList.add('active');
     }
 
@@ -401,7 +634,6 @@
       currentRestoId = null;
     });
 
-    // ---------- CART ----------
     function addToCart(restoId, name, price) {
       const resto = restaurantData.find(r => r.id === restoId);
       const restoName = resto ? resto.name : 'Unknown';
@@ -426,17 +658,17 @@
         cartTotalPrice.textContent = '৳ 0';
         return;
       }
-
       let total = 0;
       let html = '';
       keys.forEach(key => {
         const item = cart[key];
         const subtotal = item.price * item.qty;
         total += subtotal;
+        const displayName = formatItemDisplay(item.name, item.qty);
         html += `
           <div class="cart-item">
             <div class="item-name">
-              ${item.name}
+              ${displayName}
               <small>${item.restoName}</small>
             </div>
             <div class="qty-control">
@@ -451,7 +683,6 @@
       });
       cartItemsContainer.innerHTML = html;
       cartTotalPrice.textContent = `৳ ${total}`;
-
       cartItemsContainer.querySelectorAll('.fa-minus, .fa-plus').forEach(el => {
         el.addEventListener('click', function() {
           changeQty(this.dataset.key, parseInt(this.dataset.delta));
@@ -464,11 +695,21 @@
       });
     }
 
-    // ---------- WHATSAPP ----------
     function buildOrderMessage() {
-      const name = document.getElementById('customerName').value.trim();
-      const phone = document.getElementById('customerPhone').value.trim();
-      const address = document.getElementById('customerAddress').value.trim();
+      const registeredName = localStorage.getItem('orderExpress_name') || 'Not Registered';
+      const registeredPhone = localStorage.getItem('orderExpress_phone') || 'Not Registered';
+      const deviceId = localStorage.getItem('orderExpress_deviceId') || 'UNKNOWN_DEVICE';
+
+      const deliveryName = document.getElementById('customerName').value.trim();
+      const deliveryPhone = document.getElementById('customerPhone').value.trim();
+      const deliveryAddress = document.getElementById('customerAddress').value.trim();
+      const customerNote = document.getElementById('customerNote').value.trim();
+
+      if (deliveryName === '' || deliveryPhone === '' || deliveryAddress === '') {
+        alert('⚠️ দয়া করে অর্ডার ফর্মে নাম, ফোন নম্বর এবং ঠিকানা সম্পূর্ণভাবে পূরণ করুন!');
+        return null;
+      }
+
       const keys = Object.keys(cart);
       if (keys.length === 0) return null;
 
@@ -477,25 +718,38 @@
         const item = cart[key];
         const subtotal = item.price * item.qty;
         total += subtotal;
-        itemLines += `• ${item.name} (${item.restoName}) x${item.qty} = ৳${subtotal}\n`;
+        const displayName = formatItemDisplay(item.name, item.qty);
+        itemLines += `• ${displayName} (${item.restoName}) = ৳${subtotal}\n`;
       });
 
+      let notePart = '';
+      if (customerNote !== '') {
+        notePart = `\n📝 Custom Note:\n${customerNote}\n`;
+      }
+
       return `New Order Express
-Name: ${name || 'N/A'}
-Phone: ${phone || 'N/A'}
-Address: ${address || 'N/A'}
-Items:
+📋 Registered Info:
+Name: ${registeredName}
+Phone: ${registeredPhone}
+Device ID: ${deviceId}
+------------------------
+🚚 Delivery Details:
+Name: ${deliveryName}
+Phone: ${deliveryPhone}
+Address: ${deliveryAddress}
+${notePart}
+------------------------
+🛒 Items:
 ${itemLines}
 Total Price: ৳${total}`;
     }
 
     confirmBtn.addEventListener('click', function() {
       const msg = buildOrderMessage();
-      if (!msg) { alert('Cart is empty!'); return; }
+      if (!msg) return;
       window.open(`https://wa.me/8801867477158?text=${encodeURIComponent(msg)}`, '_blank');
     });
 
-    // ---------- SEARCH & CATEGORY ----------
     searchInput.addEventListener('input', function() {
       searchQuery = this.value;
       renderRestaurants();
@@ -510,7 +764,6 @@ Total Price: ৳${total}`;
       });
     });
 
-    // ---------- INIT ----------
     renderRestaurants();
     renderCart();
   })();
